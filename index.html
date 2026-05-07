@@ -8,247 +8,121 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #060609;
-            --surface: rgba(15, 15, 25, 0.7);
-            --border: rgba(255, 255, 255, 0.06);
-            --primary: #00ff88;
-            --primary-glow: rgba(0, 255, 136, 0.3);
-            --accent: #ff6a00;
-            --accent-glow: rgba(255, 106, 0, 0.3);
-            --purple: #a855f7;
-            --purple-glow: rgba(168, 85, 247, 0.3);
-            --text: #e8e8f0;
-            --muted: #6a6a80;
-            --radius: 16px;
-            --ease: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
+        :root { --bg:#060609;--surface:rgba(15,15,25,0.7);--border:rgba(255,255,255,0.06);--primary:#00ff88;--primary-glow:rgba(0,255,136,0.3);--accent:#ff6a00;--accent-glow:rgba(255,106,0,0.3);--purple:#a855f7;--purple-glow:rgba(168,85,247,0.3);--text:#e8e8f0;--muted:#6a6a80;--radius:16px;--ease:cubic-bezier(0.4,0,0.2,1); }
+        *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+        #cursor-glow{position:fixed;width:600px;height:600px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(0,255,136,0.07) 0%,transparent 70%);transform:translate(-50%,-50%);transition:left .3s ease,top .3s ease}
+        #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+        .container{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px}
+        section{padding:100px 0}
+        .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-top:40px}
 
-        /* ===== CURSOR GLOW ===== */
-        #cursor-glow {
-            position: fixed; width: 600px; height: 600px; border-radius: 50%;
-            pointer-events: none; z-index: 0;
-            background: radial-gradient(circle, rgba(0,255,136,0.07) 0%, transparent 70%);
-            transform: translate(-50%, -50%);
-            transition: left 0.3s ease, top 0.3s ease;
-        }
+        /* BADGE */
+        .version-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);padding:6px 14px;border-radius:50px;font-size:.8rem;color:var(--muted);backdrop-filter:blur(8px);margin-bottom:24px;animation:fadeDown .8s var(--ease) both;transition:border-color .5s,color .5s,background .5s}
+        .version-badge.checking{border-color:rgba(255,255,255,0.08);color:var(--muted)}
+        .version-badge.online{border-color:rgba(0,255,136,0.45);color:var(--primary);background:rgba(0,255,136,0.06)}
+        .version-badge.offline{border-color:rgba(255,59,48,0.45);color:#ff3b30;background:rgba(255,59,48,0.06)}
+        .badge-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .5s,box-shadow .5s}
+        .version-badge.online .badge-dot{background:var(--primary);box-shadow:0 0 8px var(--primary);animation:pulse 2s infinite}
+        .version-badge.offline .badge-dot{background:#ff3b30;box-shadow:0 0 8px #ff3b30;animation:none}
+        .version-badge.checking .badge-dot{background:var(--muted);box-shadow:none;animation:blink 1.2s ease-in-out infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-        /* ===== CANVAS BG ===== */
-        #bg-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; pointer-events: none;
-        }
+        h1{font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:4px;font-size:clamp(3rem,8vw,6rem);line-height:1;margin-bottom:16px;animation:fadeDown .8s var(--ease) .1s both}
+        h1 .line1{display:block;color:#fff;text-shadow:0 0 30px rgba(255,255,255,.2)}
+        h1 .line2{display:block;font-size:.45em;letter-spacing:12px;background:linear-gradient(90deg,var(--primary),var(--accent),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 20px var(--primary-glow))}
+        .hero-desc{font-size:1.05rem;color:var(--muted);max-width:550px;margin-bottom:36px;animation:fadeDown .8s var(--ease) .2s both}
+        @keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 
-        /* ===== CONTAINER ===== */
-        .container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-        section { padding: 100px 0; }
+        /* STATUS ROW */
+        .status-row{display:flex;gap:16px;margin-bottom:8px;flex-wrap:wrap;justify-content:center;animation:fadeDown .8s var(--ease) .3s both}
+        .status-chip{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.3);padding:8px 16px;border-radius:8px;border:1px solid var(--border);font-size:.85rem}
+        .status-chip .val{font-weight:700;font-family:'JetBrains Mono',monospace;color:#fff;transition:color .4s}
+        .status-chip .val.online{color:var(--primary)}.status-chip .val.offline{color:#ff3b30}.status-chip .val.checking{color:var(--muted)}
+        .pulse{width:8px;height:8px;border-radius:50%;transition:background .4s,box-shadow .4s}
+        .pulse.on{background:var(--primary);box-shadow:0 0 10px var(--primary);animation:pulse 2s infinite}
+        .pulse.off{background:#ff3b30;box-shadow:0 0 10px #ff3b30;animation:none}
+        .pulse.checking{background:var(--muted);box-shadow:none;animation:blink 1.2s ease-in-out infinite}
+        @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.5}}
 
-        /* ===== HERO ===== */
-        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-top: 40px; }
+        .last-check{font-size:.72rem;color:var(--muted);margin-bottom:28px;font-family:'JetBrains Mono',monospace;opacity:.55;animation:fadeDown .8s var(--ease) .35s both}
 
-        .version-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            padding: 6px 14px; border-radius: 50px; font-size: 0.8rem; color: var(--muted);
-            backdrop-filter: blur(8px); margin-bottom: 24px;
-            animation: fadeDown 0.8s var(--ease) both;
-        }
-        .version-badge .dot { width: 7px; height: 7px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 8px var(--primary); }
+        /* IP CARD */
+        .ip-card{background:var(--surface);border:1px solid var(--border);backdrop-filter:blur(12px);border-radius:20px;padding:32px 28px;width:100%;max-width:520px;position:relative;overflow:hidden;animation:fadeUp .8s var(--ease) .4s both}
+        .ip-card::after{content:'';position:absolute;inset:-1px;border-radius:20px;padding:1px;background:conic-gradient(from var(--a,0deg),transparent 40%,var(--primary) 50%,var(--accent) 60%,transparent 70%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 4s linear infinite;pointer-events:none;opacity:.4}
+        @property --a{syntax:'<angle>';initial-value:0deg;inherits:false}
+        @keyframes spin{to{--a:360deg}}
+        .ip-label{font-size:.75rem;text-transform:uppercase;letter-spacing:3px;color:var(--muted);margin-bottom:12px}
+        .ip-text{font-family:'JetBrains Mono',monospace;font-size:clamp(.75rem,2vw,1.05rem);color:#fff;text-align:center;padding:12px;background:rgba(0,0,0,.3);border-radius:10px;border:1px dashed rgba(255,255,255,.1);margin-bottom:20px;user-select:all}
+        .btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border:none;border-radius:12px;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .25s var(--ease);text-decoration:none;font-family:inherit;position:relative;overflow:hidden}
+        .btn-primary{background:linear-gradient(135deg,#00cc6a,var(--primary));color:#003322;box-shadow:0 0 20px var(--primary-glow)}
+        .btn-primary:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 30px var(--primary-glow)}
+        .btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--border);color:#fff}
+        .btn-ghost:hover{background:rgba(255,255,255,.1);border-color:var(--primary)}
+        .btn-download{background:linear-gradient(135deg,var(--accent),#ff9500);color:#fff;padding:16px 32px;font-size:1rem;box-shadow:0 0 20px var(--accent-glow)}
+        .btn-download:hover{transform:translateY(-3px);box-shadow:0 0 30px var(--accent-glow)}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 
-        h1 {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 4px;
-            font-size: clamp(3rem, 8vw, 6rem); line-height: 1; margin-bottom: 16px;
-            animation: fadeDown 0.8s var(--ease) 0.1s both;
-        }
-        h1 .line1 { display: block; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.2); }
-        h1 .line2 {
-            display: block; font-size: 0.45em; letter-spacing: 12px;
-            background: linear-gradient(90deg, var(--primary), var(--accent), var(--purple));
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-            filter: drop-shadow(0 0 20px var(--primary-glow));
-        }
+        /* REVEAL */
+        .reveal{opacity:0;transform:translateY(40px);transition:all .7s var(--ease)}.reveal.show{opacity:1;transform:translateY(0)}
+        .reveal:nth-child(2){transition-delay:.1s}.reveal:nth-child(3){transition-delay:.2s}.reveal:nth-child(4){transition-delay:.3s}.reveal:nth-child(5){transition-delay:.4s}.reveal:nth-child(6){transition-delay:.5s}
 
-        .hero-desc {
-            font-size: 1.05rem; color: var(--muted); max-width: 550px; margin-bottom: 36px;
-            animation: fadeDown 0.8s var(--ease) 0.2s both;
-        }
+        /* FEATURES */
+        .section-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;text-align:center;margin-bottom:12px;background:linear-gradient(90deg,#fff,var(--primary));-webkit-background-clip:text;background-clip:text;color:transparent}
+        .section-sub{text-align:center;color:var(--muted);margin-bottom:50px;font-size:1rem}
+        .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:40px}
+        .feat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .3s var(--ease);position:relative;overflow:hidden;cursor:default}
+        .feat:hover{transform:translateY(-4px);border-color:var(--primary);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+        .feat::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;background:radial-gradient(400px circle at var(--mx) var(--my),var(--primary-glow),transparent 40%)}
+        .feat:hover::before{opacity:1}
+        .feat-icon{font-size:2rem;margin-bottom:10px;display:block}
+        .feat h3{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--primary);margin-bottom:6px}
+        .feat p{color:var(--muted);font-size:.88rem}
+        .feat-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700;background:rgba(0,255,136,0.1);color:var(--primary);margin-top:8px}
+        .feat-tag.purple{background:rgba(168,85,247,0.15);color:var(--purple)}
+        .feat-tag.orange{background:rgba(255,106,0,0.15);color:var(--accent)}
 
-        @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* DOWNLOAD */
+        .dl-section{text-align:center;padding:60px 0}
+        .dl-card{background:var(--surface);border:1px solid var(--border);backdrop-filter:blur(12px);border-radius:24px;padding:48px 36px;position:relative;overflow:hidden}
+        .dl-card::before{content:'';position:absolute;top:-60%;left:-60%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,var(--accent),transparent 40%);animation:spin 6s linear infinite;opacity:.05}
+        .dl-card h2{font-family:'Orbitron',sans-serif;font-size:1.8rem;margin-bottom:10px;position:relative;background:linear-gradient(90deg,var(--accent),#ffaa00);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .dl-card p{color:var(--muted);margin-bottom:28px;position:relative;max-width:500px;margin-left:auto;margin-right:auto}
+        .dl-meta{display:flex;gap:20px;justify-content:center;margin-top:20px;flex-wrap:wrap;position:relative}
+        .dl-meta span{color:var(--muted);font-size:.85rem;display:flex;align-items:center;gap:4px}
 
-        /* ===== STATUS BAR ===== */
-        .status-row { display: flex; gap: 16px; margin-bottom: 36px; flex-wrap: wrap; justify-content: center; animation: fadeDown 0.8s var(--ease) 0.3s both; }
-        .status-chip {
-            display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3);
-            padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem;
-        }
-        .status-chip .val { font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #fff; }
-        .pulse { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); animation: pulse 2s infinite; }
-        .pulse.off { background: #ff3b30; box-shadow: 0 0 10px #ff3b30; animation: none; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.7); opacity: 0.5; } }
+        footer{text-align:center;padding:40px 20px;color:var(--muted);border-top:1px solid var(--border);font-size:.85rem;position:relative;z-index:1}
+        .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border:1px solid var(--primary);color:var(--primary);padding:14px 28px;border-radius:12px;font-weight:600;z-index:1000;opacity:0;transition:all .4s var(--ease);backdrop-filter:blur(12px);box-shadow:0 10px 40px rgba(0,0,0,.5);font-family:'Inter',sans-serif}
+        .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-        /* ===== IP CARD ===== */
-        .ip-card {
-            background: var(--surface); border: 1px solid var(--border); backdrop-filter: blur(12px);
-            border-radius: 20px; padding: 32px 28px; width: 100%; max-width: 520px; position: relative; overflow: hidden;
-            animation: fadeUp 0.8s var(--ease) 0.4s both;
-        }
-        .ip-card::after {
-            content: ''; position: absolute; inset: -1px; border-radius: 20px; padding: 1px;
-            background: conic-gradient(from var(--a, 0deg), transparent 40%, var(--primary) 50%, var(--accent) 60%, transparent 70%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 4s linear infinite; pointer-events: none; opacity: 0.4;
-        }
-        @property --a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-        @keyframes spin { to { --a: 360deg; } }
-
-        .ip-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3px; color: var(--muted); margin-bottom: 12px; }
-        .ip-text {
-            font-family: 'JetBrains Mono', monospace; font-size: clamp(0.75rem, 2vw, 1.05rem);
-            color: #fff; text-align: center; padding: 12px; background: rgba(0,0,0,0.3);
-            border-radius: 10px; border: 1px dashed rgba(255,255,255,0.1); margin-bottom: 20px; user-select: all;
-        }
-        .btn-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-        .btn {
-            display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px;
-            border: none; border-radius: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer;
-            transition: all 0.25s var(--ease); text-decoration: none; font-family: inherit; position: relative; overflow: hidden;
-        }
-        .btn-primary { background: linear-gradient(135deg, #00cc6a, var(--primary)); color: #003322; box-shadow: 0 0 20px var(--primary-glow); }
-        .btn-primary:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 0 30px var(--primary-glow); }
-        .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; }
-        .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); }
-        .btn-download {
-            background: linear-gradient(135deg, var(--accent), #ff9500); color: #fff;
-            padding: 16px 32px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);
-        }
-        .btn-download:hover { transform: translateY(-3px); box-shadow: 0 0 30px var(--accent-glow); }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* ===== SCROLL REVEAL ===== */
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.7s var(--ease); }
-        .reveal.show { opacity: 1; transform: translateY(0); }
-        .reveal:nth-child(2) { transition-delay: 0.1s; }
-        .reveal:nth-child(3) { transition-delay: 0.2s; }
-        .reveal:nth-child(4) { transition-delay: 0.3s; }
-        .reveal:nth-child(5) { transition-delay: 0.4s; }
-        .reveal:nth-child(6) { transition-delay: 0.5s; }
-
-        /* ===== FEATURES GRID ===== */
-        .section-title {
-            font-family: 'Orbitron', sans-serif; font-size: clamp(1.6rem, 4vw, 2.4rem);
-            font-weight: 900; text-align: center; margin-bottom: 12px;
-            background: linear-gradient(90deg, #fff, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .section-sub { text-align: center; color: var(--muted); margin-bottom: 50px; font-size: 1rem; }
-
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 40px; }
-        .feat {
-            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;
-            transition: all 0.3s var(--ease); position: relative; overflow: hidden; cursor: default;
-        }
-        .feat:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .feat::before {
-            content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s;
-            background: radial-gradient(400px circle at var(--mx) var(--my), var(--primary-glow), transparent 40%);
-        }
-        .feat:hover::before { opacity: 1; }
-        .feat-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
-        .feat h3 { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--primary); margin-bottom: 6px; }
-        .feat p { color: var(--muted); font-size: 0.88rem; }
-        .feat-tag {
-            display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
-            background: var(--primary-dim); color: var(--primary); margin-top: 8px;
-        }
-        .feat-tag.purple { background: rgba(168,85,247,0.15); color: var(--purple); }
-        .feat-tag.orange { background: var(--accent-dim); color: var(--accent); }
-
-        /* ===== DOWNLOAD SECTION ===== */
-        .dl-section { text-align: center; padding: 60px 0; }
-        .dl-card {
-            background: var(--surface); border: 1px solid var(--border); backdrop-filter: blur(12px);
-            border-radius: 24px; padding: 48px 36px; position: relative; overflow: hidden;
-        }
-        .dl-card::before {
-            content: ''; position: absolute; top: -60%; left: -60%; width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent, var(--accent), transparent 40%);
-            animation: spin 6s linear infinite; opacity: 0.05;
-        }
-        .dl-card h2 {
-            font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin-bottom: 10px; position: relative;
-            background: linear-gradient(90deg, var(--accent), #ffaa00); -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .dl-card p { color: var(--muted); margin-bottom: 28px; position: relative; max-width: 500px; margin-left: auto; margin-right: auto; }
-        .dl-meta {
-            display: flex; gap: 20px; justify-content: center; margin-top: 20px; flex-wrap: wrap; position: relative;
-        }
-        .dl-meta span { color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; gap: 4px; }
-
-        /* ===== FOOTER ===== */
-        footer {
-            text-align: center; padding: 40px 20px; color: var(--muted); border-top: 1px solid var(--border);
-            font-size: 0.85rem; position: relative; z-index: 1;
-        }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: var(--surface); border: 1px solid var(--primary); color: var(--primary);
-            padding: 14px 28px; border-radius: 12px; font-weight: 600; z-index: 1000;
-            opacity: 0; transition: all 0.4s var(--ease); backdrop-filter: blur(12px);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif;
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        /* ===== MOBILE ===== */
-        @media (max-width: 768px) {
-            section { padding: 70px 0; }
-            .btn-row { flex-direction: column; }
-            .btn { width: 100%; justify-content: center; }
-            .status-row { flex-direction: column; align-items: center; }
-            .ip-card { padding: 24px 16px; }
-            .features { grid-template-columns: 1fr; }
-        }
-        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; } }
+        @media(max-width:768px){section{padding:70px 0}.btn-row{flex-direction:column}.btn{width:100%;justify-content:center}.status-row{flex-direction:column;align-items:center}.ip-card{padding:24px 16px}.features{grid-template-columns:1fr}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
     </style>
 </head>
 <body>
     <div id="cursor-glow"></div>
     <canvas id="bg-canvas"></canvas>
-
     <div class="container">
         <section class="hero">
-            <div class="version-badge"><span class="dot" id="statusDot"></span> <span id="onlineStatus">Проверка сервера...</span></div>
-            <h1>
-                <span class="line1">TRAP</span>
-                <span class="line2">LAND</span>
-            </h1>
-            <p class="hero-desc">Самый крутой сервер в мире,кидайся какашками,кушой ванючек,,,жоска не мойся и ваняй....,,,</p>
-
-            <div class="status-row">
-                <div class="status-chip"><span class="pulse" id="onlineDot"></span><span class="status-chip-label">Статус:</span><span class="val" id="onlineStatus">...</span></div>
-                <div class="status-chip"><span class="status-chip-label">Игроки:</span><span class="val" id="playerCount">-- / --</span></div>
-                <div class="status-chip"><span class="status-chip-label">Версия:</span><span class="val">1.21.1</span></div>
-                <div class="status-chip"><span class="status-chip-label">Ядро:</span><span class="val">Fabric</span></div>
+            <div class="version-badge checking" id="badge">
+                <span class="badge-dot"></span>
+                <span id="badgeText">Проверка сервера...</span>
             </div>
-
+            <h1><span class="line1">TRAP</span><span class="line2">LAND</span></h1>
+            <p class="hero-desc">Хардкорный RPG сервер с квестами, кланами, PvP и кастомными модами. Выживай, прокачивайся, доминируй.</p>
+            <div class="status-row">
+                <div class="status-chip"><span class="pulse checking" id="onlineDot"></span><span>Статус:</span><span class="val checking" id="onlineStatus">Проверка...</span></div>
+                <div class="status-chip"><span>Игроки:</span><span class="val" id="playerCount">-- / --</span></div>
+                <div class="status-chip"><span>Версия:</span><span class="val">1.21.1</span></div>
+                <div class="status-chip"><span>Ядро:</span><span class="val">Fabric</span></div>
+            </div>
+            <div class="last-check" id="lastCheck">Обновление каждые 45 сек</div>
             <div class="ip-card">
                 <div class="ip-label">Адрес сервера</div>
-                <div class="ip-text" id="ipText">mc.никольское-центр-мира.рф:25565</div>
+                <div class="ip-text">mc.никольское-центр-мира.рф:25565</div>
                 <div class="btn-row">
-                    <button class="btn btn-primary" onclick="connectServer()">🎮 Подключиться</button>
+                    <button class="btn btn-primary" onclick="copyIP()">📋 Скопировать IP</button>
                     <button class="btn btn-ghost" id="btnCopy" onclick="copyIP()">📋 Скопировать</button>
                 </div>
             </div>
@@ -258,43 +132,18 @@
             <h2 class="section-title reveal">Что на сервере</h2>
             <p class="section-sub reveal">Все основные возможности и фишки TRAP LAND</p>
             <div class="features">
-                <div class="feat reveal">
-                    <span class="feat-icon">🧙</span>
-                    <h3>Магия</h3>
-                    <p>Spell Engine, руны, ледяная и огненная магия (IceAndFire), магические артефакты (Trinkets)</p>
-                    <span class="feat-tag purple">Магия</span>
-                </div>
-                <div class="feat reveal">
-                    <span class="feat-icon">🗡️</span>
-                    <h3>Классы и навыки</h3>
-                    <p>Дерево навыков, классы лучника и плута, расширенная боевая система, дальнобойное оружие</p>
-                    <span class="feat-tag orange">Классы</span>
-                </div>
-                <div class="feat reveal">
-                    <span class="feat-icon">🦎</span>
-                    <h3>Животные и существа</h3>
-                    <p>Драконы и грифоны (IceAndFire), хомяки-питомцы, новая фауна в биомах</p>
-                    <span class="feat-tag">Существа</span>
-                </div>
-                <div class="feat reveal">
-                    <span class="feat-icon">🌿</span>
-                    <h3>Новые биомы</h3>
-                    <p>Oh The Biomes We've Gone, новые деревья, TerraBlender, улучшенная дикая природа</p>
-                    <span class="feat-tag purple">Генерация</span>
-                </div>
-                <div class="feat reveal">
-                    <span class="feat-icon">🏠</span>
-                    <h3>Декорации</h3>
-                    <p>Мебель (Handcrafted), картины, гончарство, гамаки, шляпы и кастомный визуал</p>
-                    <span class="feat-tag">Декор</span>
-                </div>
-                <div class="feat reveal">
-                    <span class="feat-icon">🍞</span>
-                    <h3>Фермерство и еда</h3>
-                    <p>Farmer's Delight, пивоварня, пекарня, виноделие — десятки новых рецептов и блюд</p>
-                    <span class="feat-tag orange">Фермерство</span>
-                </div>
-
+                <div class="feat reveal"><span class="feat-icon">⚔️</span><h3>PvP Система</h3><p>Рейтинговые бои, арена 1v1 и массовые сражения</p><span class="feat-tag orange">PvP</span></div>
+                <div class="feat reveal"><span class="feat-icon">📜</span><h3>Квесты</h3><p>Сюжетные и побочные задания с наградами</p><span class="feat-tag">RPG</span></div>
+                <div class="feat reveal"><span class="feat-icon">🏰</span><h3>Кланы</h3><p>Создай альянс, захватывай территории</p><span class="feat-tag purple">Социальное</span></div>
+                <div class="feat reveal"><span class="feat-icon">💎</span><h3>Экономика</h3><p>Торговля, аукцион, кастомные предметы</p><span class="feat-tag">Система</span></div>
+                <div class="feat reveal"><span class="feat-icon">🌍</span><h3>Открытый мир</h3><p>Данжи, боссы, секретные зоны</p><span class="feat-tag purple">Исследование</span></div>
+                <div class="feat reveal"><span class="feat-icon">🔧</span><h3>Fabric 1.21.1</h3><p>Оптимизированная кастомная сборка</p><span class="feat-tag orange">Техническое</span></div>
+                <div class="feat reveal"><span class="feat-icon">🧙</span><h3>Магия</h3><p>Spell Engine, руны, ледяная и огненная магия (IceAndFire), магические артефакты (Trinkets)</p><span class="feat-tag purple">Магия</span></div>
+                <div class="feat reveal"><span class="feat-icon">🗡️</span><h3>Классы и навыки</h3><p>Дерево навыков, классы лучника и плута, расширенная боевая система, дальнобойное оружие</p><span class="feat-tag orange">Классы</span></div>
+                <div class="feat reveal"><span class="feat-icon">🦎</span><h3>Животные и существа</h3><p>Драконы и грифоны (IceAndFire), хомяки-питомцы, новая фауна в биомах</p><span class="feat-tag">Существа</span></div>
+                <div class="feat reveal"><span class="feat-icon">🌿</span><h3>Новые биомы</h3><p>Oh The Biomes We've Gone, новые деревья, TerraBlender, улучшенная дикая природа</p><span class="feat-tag purple">Генерация</span></div>
+                <div class="feat reveal"><span class="feat-icon">🏠</span><h3>Декорации</h3><p>Мебель (Handcrafted), картины, гончарство, гамаки, шляпы и кастомный визуал</p><span class="feat-tag">Декор</span></div>
+                <div class="feat reveal"><span class="feat-icon">🍞</span><h3>Фермерство и еда</h3><p>Farmer's Delight, пивоварня, пекарня, виноделие — десятки новых рецептов и блюд</p><span class="feat-tag orange">Фермерство</span></div>
             </div>
         </section>
 
@@ -302,88 +151,107 @@
             <div class="dl-card reveal">
                 <h2>📦 Скачать сборку</h2>
                 <p>Файлы перекинуть в корень игры</p>
-
-                <a href="https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/BQXpmR7k7UEgKA
-" target="_blank" rel="noopener" class="btn btn-download" id="btnDl">Скачать</a>
-                <div class="dl-meta">
-                    <span>📁 Emotes - 241 мб</span>
-                    <span>📁 mods - 435 мб</span>
-                </div>
+                <a href="https://getfile.dokpub.com/yandex/get/https://disk.yandex.ru/d/BQXpmR7k7UEgKA" target="_blank" rel="noopener" class="btn btn-download">Скачать</a>
+                <div class="dl-meta"><span>📁 Emotes — 241 мб</span><span>📁 mods — 435 мб</span></div>
             </div>
         </section>
     </div>
 
     <footer>
         <p>© 2026 TRAP LAND</p>
-        <p style="margin-top:6px;">Мы не связаны с Mojang Studios или Microsoft.Реально,не вру</p>
+        <p style="margin-top:6px;">Мы не связаны с Mojang Studios или Microsoft. Реально, не вру</p>
     </footer>
-
-    <div class="toast" id="toast">✅ Готово!</div>
+    <div class="toast" id="toast"></div>
 
     <script>
         const toastEl = document.getElementById('toast');
-        function showToast(msg, color = 'var(--primary)') {
-            toastEl.textContent = msg; toastEl.style.borderColor = color; toastEl.style.color = color;
-            toastEl.classList.add('show'); setTimeout(() => toastEl.classList.remove('show'), 3000);
+        function showToast(msg, color='var(--primary)') {
+            toastEl.textContent=msg; toastEl.style.borderColor=color; toastEl.style.color=color;
+            toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'),3000);
         }
 
         function copyIP() {
-            const ip = 'mc.никольское-центр-мира.рф:25565';
-            navigator.clipboard.writeText(ip).then(() => {
-                const b = document.getElementById('btnCopy'); b.textContent = '✅ Скопировано';
-                showToast('✅ IP скопирован!'); setTimeout(() => b.textContent = '📋 Скопировать', 2000);
-            }).catch(() => showToast('⚠️ Не удалось скопировать', 'var(--accent)'));
+            navigator.clipboard.writeText('mc.никольское-центр-мира.рф:25565').then(()=>{
+                const b=document.getElementById('btnCopy'); b.textContent='✅ Скопировано';
+                showToast('✅ IP скопирован!'); setTimeout(()=>b.textContent='📋 Скопировать',2000);
+            }).catch(()=>showToast('⚠️ Не удалось скопировать','var(--accent)'));
         }
 
-        function connectServer() {
-            window.location.href = 'minecraft://mc.никольское-центр-мира.рф:25565';
-            setTimeout(() => { copyIP(); showToast('🎮 Откройте Minecraft → Сетевая игра → Добавить сервер', 'var(--accent)'); }, 1200);
-        }
+        // ===== СТАТУС (без перезагрузки) =====
+        const INTERVAL = 45;
+        let countdown = INTERVAL;
+        let cdTimer = null;
 
         async function fetchStatus() {
-            const dot = document.getElementById('onlineDot');
-            const txt = document.getElementById('onlineStatus');
-            const plr = document.getElementById('playerCount');
+            const badge     = document.getElementById('badge');
+            const badgeText = document.getElementById('badgeText');
+            const dot       = document.getElementById('onlineDot');
+            const stTxt     = document.getElementById('onlineStatus');
+            const plrTxt    = document.getElementById('playerCount');
+
+            badge.className='version-badge checking'; badgeText.textContent='Проверка сервера...';
+            dot.className='pulse checking'; stTxt.className='val checking'; stTxt.textContent='Проверка...';
+
             try {
                 const r = await fetch('https://api.mcsrvstat.us/3/mc.никольское-центр-мира.рф');
                 const d = await r.json();
                 if (d.online) {
-                    dot.classList.remove('off'); txt.textContent = 'Онлайн';
-                    plr.textContent = `${d.players.online} / ${d.players.max}`;
-                } else throw 'o';
-            } catch { dot.classList.add('off'); txt.textContent = 'Оффлайн'; plr.textContent = '--'; }
+                    badge.className='version-badge online'; badgeText.textContent='✓ Сервер онлайн';
+                    dot.className='pulse on'; stTxt.className='val online'; stTxt.textContent='Онлайн';
+                    plrTxt.textContent=`${d.players.online} / ${d.players.max}`;
+                } else throw 0;
+            } catch {
+                badge.className='version-badge offline'; badgeText.textContent='✕ Сервер недоступен';
+                dot.className='pulse off'; stTxt.className='val offline'; stTxt.textContent='Оффлайн';
+                plrTxt.textContent='--';
+            }
+
+            countdown = INTERVAL;
+            if (cdTimer) clearInterval(cdTimer);
+            tick();
+            cdTimer = setInterval(()=>{ countdown--; tick(); if(countdown<=0) clearInterval(cdTimer); }, 1000);
         }
-        fetchStatus(); setInterval(fetchStatus, 45000);
 
-        const glow = document.getElementById('cursor-glow');
-        document.addEventListener('mousemove', e => { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; });
+        function tick() {
+            const now = new Date();
+            const t = now.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+            document.getElementById('lastCheck').textContent =
+                `Последняя проверка: ${t} · следующая через ${Math.max(0,countdown)} сек`;
+        }
 
-        document.querySelectorAll('.feat').forEach(c => {
-            c.addEventListener('mousemove', e => {
-                const r = c.getBoundingClientRect();
-                const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-                c.style.setProperty('--mx', (x * 100) + '%');
-                c.style.setProperty('--my', (y * 100) + '%');
-                c.style.transform = `perspective(600px) rotateX(${(y-0.5)*-8}deg) rotateY(${(x-0.5)*8}deg) translateY(-4px)`;
+        fetchStatus();
+        setInterval(fetchStatus, INTERVAL * 1000);
+
+        // cursor
+        const glow=document.getElementById('cursor-glow');
+        document.addEventListener('mousemove',e=>{ glow.style.left=e.clientX+'px'; glow.style.top=e.clientY+'px'; });
+
+        // card tilt
+        document.querySelectorAll('.feat').forEach(c=>{
+            c.addEventListener('mousemove',e=>{
+                const r=c.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+                c.style.setProperty('--mx',(x*100)+'%'); c.style.setProperty('--my',(y*100)+'%');
+                c.style.transform=`perspective(600px) rotateX(${(y-.5)*-8}deg) rotateY(${(x-.5)*8}deg) translateY(-4px)`;
             });
-            c.addEventListener('mouseleave', () => c.style.transform = '');
+            c.addEventListener('mouseleave',()=>c.style.transform='');
         });
 
-        const io = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('show'); }), { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+        // reveal
+        const io=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('show'); }),{threshold:.1});
+        document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-        const cv = document.getElementById('bg-canvas'); const cx = cv.getContext('2d');
-        let pts = [];
-        function resize() { cv.width = innerWidth; cv.height = innerHeight; }
-        resize(); addEventListener('resize', resize);
+        // particles
+        const cv=document.getElementById('bg-canvas'), cx=cv.getContext('2d');
+        function resize(){ cv.width=innerWidth; cv.height=innerHeight; }
+        resize(); addEventListener('resize',resize);
         class P {
-            constructor() { this.reset(); }
-            reset() { this.x = Math.random()*cv.width; this.y = Math.random()*cv.height; this.vx=(Math.random()-0.5)*0.3; this.vy=(Math.random()-0.5)*0.3; this.r=Math.random()*2+0.5; this.a=Math.random()*0.4+0.1; this.c=Math.random()>0.6?'255,106,0':'0,255,136'; }
-            update() { this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>cv.width)this.vx*=-1; if(this.y<0||this.y>cv.height)this.vy*=-1; }
-            draw() { cx.beginPath(); cx.arc(this.x,this.y,this.r,0,Math.PI*2); cx.fillStyle=`rgba(${this.c},${this.a})`; cx.fill(); }
+            constructor(){ this.reset(); }
+            reset(){ this.x=Math.random()*cv.width; this.y=Math.random()*cv.height; this.vx=(Math.random()-.5)*.3; this.vy=(Math.random()-.5)*.3; this.r=Math.random()*2+.5; this.a=Math.random()*.4+.1; this.c=Math.random()>.6?'255,106,0':'0,255,136'; }
+            update(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>cv.width)this.vx*=-1; if(this.y<0||this.y>cv.height)this.vy*=-1; }
+            draw(){ cx.beginPath(); cx.arc(this.x,this.y,this.r,0,Math.PI*2); cx.fillStyle=`rgba(${this.c},${this.a})`; cx.fill(); }
         }
-        for(let i=0;i<70;i++) pts.push(new P());
-        function anim() { cx.clearRect(0,0,cv.width,cv.height); pts.forEach((p,i)=>{ p.update(); p.draw(); for(let j=i+1;j<pts.length;j++){ const d=Math.hypot(p.x-pts[j].x,p.y-pts[j].y); if(d<110){ cx.beginPath(); cx.strokeStyle=`rgba(0,255,136,${0.06*(1-d/110)})`; cx.lineWidth=0.5; cx.moveTo(p.x,p.y); cx.lineTo(pts[j].x,pts[j].y); cx.stroke(); }}}); requestAnimationFrame(anim); }
+        const pts=[]; for(let i=0;i<70;i++) pts.push(new P());
+        function anim(){ cx.clearRect(0,0,cv.width,cv.height); pts.forEach((p,i)=>{ p.update(); p.draw(); for(let j=i+1;j<pts.length;j++){ const d=Math.hypot(p.x-pts[j].x,p.y-pts[j].y); if(d<110){ cx.beginPath(); cx.strokeStyle=`rgba(0,255,136,${.06*(1-d/110)})`; cx.lineWidth=.5; cx.moveTo(p.x,p.y); cx.lineTo(pts[j].x,pts[j].y); cx.stroke(); }}}); requestAnimationFrame(anim); }
         anim();
     </script>
 </body>
